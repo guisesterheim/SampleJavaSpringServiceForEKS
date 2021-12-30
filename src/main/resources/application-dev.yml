@@ -1,0 +1,23 @@
+server:
+  port: 8080
+  shutdown: graceful
+spring:
+  main:
+    lazy-initialization: true
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+  application:
+    name: "SampleJavaSpringService"
+app:
+  name: SampleJavaSpringService
+  version: "1"
+  kubernetes:
+    URLRedirect: "/api/sampleJavaSpringService"
+logging:
+  host: platform-elk-dev.eastus2.cloudapp.azure.com:5000
+  pattern: "console:%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"
+  level:
+    liquibase: "INFO"
+    org.springframework.web: "INFO"
+    guru.springframework.controllers: "INFO"
+    org.hibernate: "INFO"
