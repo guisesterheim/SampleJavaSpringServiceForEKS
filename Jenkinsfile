@@ -5,18 +5,26 @@ pipeline {
         disableConcurrentBuilds()
     }
     environment {
-        GIT_ACCESS_TOKEN = credentials('GIT_ACCESS_TOKEN')
-        
+        AWS_CREDS = credentials('AWS_ACCOUNT_CREDENTIALS')
     }
-    
+
     stages {
-        stage('Test, Build & Sec'){
+        stage('Prepare, Test, Build & Sec'){
             parallel {
+                stage('Prepare'){
+                    steps {
+                        sh '''
+                            aws configure set default.aws_access_key_id $AWS_CREDS_USR
+                            aws configure set default.aws_secret_access_key $AWS_CREDS_PSW
+                            aws configure set default.region us-east-1
+                        '''
+                    }
+                }
                 stage('Build & Test'){
                     steps {
                         withGradle {
                             sh '''
-                                export SPRING_PROFILES_ACTIVE=$SPRING_PROFILE_TO_ACTIVATE
+                                export SPRING_PROFILES_ACTIVE=dev
                                 ./gradlew build
                                 '''
                         }
@@ -31,24 +39,20 @@ pipeline {
         }
         stage('Push Docker'){
             steps {
-                sh 'az login -u $AZ_USERNAME_USR -p $AZ_USERNAME_PSW'
                 sh '''
-                    TOKEN=$(az acr login --name $ACR_NAME --expose-token --output tsv --query accessToken)
-                    docker login -u 00000000-0000-0000-0000-000000000000 -p $TOKEN $ACR_PATH_URL
-                '''
+                    aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 594483618195.dkr.ecr.us-east-1.amazonaws.com
+                    docker build -t samplemsforeks .
+                    docker tag samplemsforeks:latest 594483618195.dkr.ecr.us-east-1.amazonaws.com/samplemsforeks:latest
 
-                script {
-                    docker.withRegistry(env.ACR_PATH_URL){
-                        def image = docker.build('$DOCKER_IMAGE_NAME:tmp')
-                        image.push()
-                    }
-                }
+                    docker push 594483618195.dkr.ecr.us-east-1.amazonaws.com/samplemsforeks:latest
+                '''
             }
         }
         stage('Deploy'){
             steps{
                 sh '''
-                    echo waiting
+                    kubectl apply -f k8s_deploy.yaml
+                    kubectl apply -f k8s_service.yaml
                 '''
             }
         }
