@@ -6,6 +6,8 @@ pipeline {
     }
     environment {
         AWS_CREDS = credentials('AWS_ACCOUNT_CREDENTIALS')
+        EKS_NAME = credentials('EKS_NAME')
+        REGION = "us-east-1"
     }
 
     stages {
@@ -16,7 +18,7 @@ pipeline {
                         sh '''
                             aws configure set default.aws_access_key_id $AWS_CREDS_USR
                             aws configure set default.aws_secret_access_key $AWS_CREDS_PSW
-                            aws configure set default.region us-east-1
+                            aws configure set default.region $REGION
                         '''
                     }
                 }
@@ -51,6 +53,7 @@ pipeline {
         stage('Deploy'){
             steps{
                 sh '''
+                    aws eks update-kubeconfig --region $REGION --name $EKS_NAME
                     kubectl apply -f k8s_deploy.yaml
                     kubectl apply -f k8s_service.yaml
                 '''
