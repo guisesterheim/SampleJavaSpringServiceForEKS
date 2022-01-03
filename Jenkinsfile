@@ -1,31 +1,32 @@
 pipeline {
     agent{
-        kubernetes {
-            label 'kaniko'
-            yaml """
-apiVersion: v1
-kind: Pod
-metadata:
-  name: kaniko
-spec:
-  serviceAccountName: jenkins-sa-agent
-  containers:
-  - name: jnlp
-    image: '594483618195.dkr.ecr.us-east-1.amazonaws.com/jenkins:latest'
-    args: ['\$(JENKINS_SECRET)', '\$(JENKINS_NAME)']
-  - name: kaniko
-    image: 594483618195.dkr.ecr.us-east-1.amazonaws.com/kaniko:latest
-    imagePullPolicy: Always
-    command:
-    - /busybox/cat
-    tty: true
-    resources:
-      requests:
-        cpu: "1"
-        memory: 4Gi
-  restartPolicy: Never
-"""
-        }
+//         kubernetes {
+//             label 'kaniko'
+//             yaml """
+// apiVersion: v1
+// kind: Pod
+// metadata:
+//   name: kaniko
+// spec:
+//   serviceAccountName: jenkins-sa-agent
+//   containers:
+//   - name: jnlp
+//     image: '594483618195.dkr.ecr.us-east-1.amazonaws.com/jenkins:latest'
+//     args: ['\$(JENKINS_SECRET)', '\$(JENKINS_NAME)']
+//   - name: kaniko
+//     image: 594483618195.dkr.ecr.us-east-1.amazonaws.com/kaniko:latest
+//     imagePullPolicy: Always
+//     command:
+//     - /busybox/cat
+//     tty: true
+//     resources:
+//       requests:
+//         cpu: "1"
+//         memory: 4Gi
+//   restartPolicy: Never
+// """
+//         }
+        any
     }
 
     options {
