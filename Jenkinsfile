@@ -14,7 +14,7 @@ spec:
     image: 'public.ecr.aws/z9u4r7b2/jenkins-agent:latest'
     args: ['\\\$(JENKINS_SECRET)', '\\\$(JENKINS_NAME)']
   - name: kaniko
-    image: aiotceo/kaniko-executor:latest
+    image: gcr.io/kaniko-project/executor:debug
     imagePullPolicy: Always
     command:
     - /busybox/cat
