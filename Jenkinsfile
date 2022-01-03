@@ -42,8 +42,8 @@ pipeline {
         stage('Push Docker'){
             steps {
                 sh '''
-                    aws ecr get-login-password --region us-east-1 | sudo docker login --username AWS --password-stdin 594483618195.dkr.ecr.us-east-1.amazonaws.com
-                    sudo docker build -t samplemsforeks .
+                    aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 594483618195.dkr.ecr.us-east-1.amazonaws.com
+                    docker build -t samplemsforeks .
                     docker tag samplemsforeks:latest 594483618195.dkr.ecr.us-east-1.amazonaws.com/samplemsforeks:latest
 
                     docker push 594483618195.dkr.ecr.us-east-1.amazonaws.com/samplemsforeks:latest
