@@ -1,5 +1,28 @@
 pipeline {
-    agent any
+    agent{
+        kubernetes {
+            label 'kaniko'
+            yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+name: kaniko
+spec:
+serviceAccountName: jenkins-sa-agent
+containers:
+- name: jnlp
+    image: 'public.ecr.aws/z9u4r7b2/jenkins-agent:latest'
+    args: ['\\\$(JENKINS_SECRET)', '\\\$(JENKINS_NAME)']
+- name: kaniko
+    image: aiotceo/kaniko-executor:latest
+    imagePullPolicy: Always
+    command:
+    - /busybox/cat
+    tty: true
+restartPolicy: Never
+"""
+        }
+    }
 
     options {
         disableConcurrentBuilds()
@@ -11,6 +34,27 @@ pipeline {
     }
 
     stages {
+        stage('Testing'){
+            environment {
+                DOCKERFILE  = "Dockerfile.v3"
+                GITREPO     = "git://github.com/ollypom/mysfits.git"
+                CONTEXT     = "./api"
+                REGISTRY    = 'public.ecr.aws/z9u4r7b2'
+                IMAGE       = 'samplems'
+                TAG         = 'latest'
+            }
+            steps {
+                container(name: 'kaniko', shell: '/busybox/sh') {
+                    sh '''#!/busybox/sh
+                    /kaniko/executor \\
+                    --context=\${GITREPO} \\
+                    --context-sub-path=\${CONTEXT} \\
+                    --dockerfile=\${DOCKERFILE} \\
+                    --destination=\${REGISTRY}/\${IMAGE}:\${TAG}
+                    '''
+                }
+            }
+        }
         stage('Prepare, Test, Build & Sec'){
             parallel {
                 stage('Prepare'){
