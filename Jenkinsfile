@@ -49,7 +49,9 @@ spec:
             }
             steps {
                 echo 'teste'
-                echo 'docker --version'
+                sh '''
+                    echo $(docker --version)
+                '''
 
                 sh '''#!/busybox/sh
                     /kaniko/executor \
