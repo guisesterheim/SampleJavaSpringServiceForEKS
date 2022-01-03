@@ -27,7 +27,7 @@ pipeline {
                         withGradle {
                             sh '''
                                 export SPRING_PROFILES_ACTIVE=dev
-                                ./gradlew build --stacktrace --no-daemon
+                                ./gradlew build --stacktrace
                             '''
                         }
                     }
