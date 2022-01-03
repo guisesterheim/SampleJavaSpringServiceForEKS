@@ -1,5 +1,5 @@
 pipeline {
-    agent{
+    agent any
 //         kubernetes {
 //             label 'kaniko'
 //             yaml """
@@ -25,9 +25,7 @@ pipeline {
 //         memory: 4Gi
 //   restartPolicy: Never
 // """
-//         }
-        any
-    }
+//         }    
 
     options {
         disableConcurrentBuilds()
