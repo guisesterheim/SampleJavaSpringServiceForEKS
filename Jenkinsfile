@@ -19,6 +19,10 @@ spec:
     command:
     - /busybox/cat
     tty: true
+    resources:
+      requests:
+        cpu: "1"
+        memory: 4Gi
   restartPolicy: Never
 """
         }
