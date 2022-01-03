@@ -11,10 +11,10 @@ spec:
   serviceAccountName: jenkins-sa-agent
   containers:
   - name: jnlp
-    image: 'public.ecr.aws/z9u4r7b2/jenkins-agent:latest'
-    args: ['\\\$(JENKINS_SECRET)', '\\\$(JENKINS_NAME)']
+    image: '594483618195.dkr.ecr.us-east-1.amazonaws.com/jenkins:latest'
+    args: ['\$(JENKINS_SECRET)', '\$(JENKINS_NAME)']
   - name: kaniko
-    image: 594483618195.dkr.ecr.us-east-1.amazonaws.com/kaniko
+    image: 594483618195.dkr.ecr.us-east-1.amazonaws.com/kaniko:latest
     imagePullPolicy: Always
     command:
     - /busybox/cat
@@ -39,19 +39,18 @@ spec:
                 DOCKERFILE  = "Dockerfile.v3"
                 GITREPO     = "git://github.com/ollypom/mysfits.git"
                 CONTEXT     = "./api"
-                REGISTRY    = 'public.ecr.aws/z9u4r7b2'
-                IMAGE       = 'samplems'
+                REGISTRY    = '594483618195.dkr.ecr.us-east-1.amazonaws.com'
+                IMAGE       = 'mysfits'
                 TAG         = 'latest'
             }
             steps {
-                echo 'skipping for now'
                 container(name: 'kaniko', shell: '/busybox/sh') {
                     sh '''#!/busybox/sh
-                    /kaniko/executor \\
-                    --context=\${GITREPO} \\
-                    --context-sub-path=\${CONTEXT} \\
-                    --dockerfile=\${DOCKERFILE} \\
-                    --destination=\${REGISTRY}/\${IMAGE}:\${TAG}
+                    /kaniko/executor \
+                    --context=${GITREPO} \
+                    --context-sub-path=${CONTEXT} \
+                    --dockerfile=${DOCKERFILE} \
+                    --destination=${REGISTRY}/${IMAGE}:${TAG}
                     '''
                 }
             }
