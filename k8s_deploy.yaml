@@ -1,24 +1,51 @@
+---
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: server-demo
+  name: sample
   namespace: default
+  labels:
+    app: sample
 spec:
-  replicas: 2
   selector:
     matchLabels:
-      app: web
+      app: sample
+  replicas: 1
+  revisionHistoryLimit: 0
   template:
     metadata:
+      name: sample
       labels:
-        app: web
+        app: sample
     spec:
       containers:
-        - name: back-end
+        - name: sample
           image: 594483618195.dkr.ecr.us-east-1.amazonaws.com/samplemsforeks:latest
+          imagePullPolicy: Always
           ports:
-            - containerPort: 8080
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 8080
+          - containerPort: 8080
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 1024M
+            requests:
+              cpu: 150m
+              memory: 256M
+      restartPolicy: Always
+        
+---
+  
+apiVersion: v1
+kind: Service
+metadata:
+  name: sample-service
+  namespace: default
+spec:
+  selector:
+    app: sample
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
+  type: LoadBalancer
