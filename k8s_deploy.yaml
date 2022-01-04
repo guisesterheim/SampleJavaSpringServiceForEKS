@@ -22,6 +22,3 @@ spec:
             httpGet:
               path: /
               port: 8080
-  strategy:
-    type: RollingUpdate
-    rollingUp      maxSurge: 50%
