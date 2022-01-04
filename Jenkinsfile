@@ -24,25 +24,27 @@ pipeline {
             parallel {
                 stage('Build, Test & Push'){
                     steps {
-                        env.CB_BUILD_ID = sh(script: 'aws codebuild start-build --project-name docker-build | jq -r .build.id', returnStdout: true).trim()
-                        echo env.CB_BUILD_ID
+                        script {
+                            env.CB_BUILD_ID = sh(script: 'aws codebuild start-build --project-name docker-build | jq -r .build.id', returnStdout: true).trim()
+                            echo env.CB_BUILD_ID
 
-                        def retryAttempt = 0
-                        retry(100) {
-                            sleep 5
+                            def retryAttempt = 0
+                            retry(100) {
+                                sleep 5
 
-                            env.CB_BUILD_STATUS = sh(script: 'aws codebuild batch-get-builds --ids $CB_BUILD_ID | jq -r .builds[0].buildStatus', returnStdout: true).trim()
-                            echo env.CB_BUILD_STATUS
-                            if(env.CB_BUILD_STATUS == "SUCCEEDED"){
-                                env.JOB_STATUS="SUCCESS"
-                                return 0
-                            }else if(env.CB_BUILD_STATUS == "FAILED"){
-                                env.JOB_STATUS="FAILURE"
-                                return 0
-                            }else{
-                                return 1
+                                env.CB_BUILD_STATUS = sh(script: 'aws codebuild batch-get-builds --ids $CB_BUILD_ID | jq -r .builds[0].buildStatus', returnStdout: true).trim()
+                                echo env.CB_BUILD_STATUS
+                                if(env.CB_BUILD_STATUS == "SUCCEEDED"){
+                                    env.JOB_STATUS="SUCCESS"
+                                    return 0
+                                }else if(env.CB_BUILD_STATUS == "FAILED"){
+                                    env.JOB_STATUS="FAILURE"
+                                    return 0
+                                }else{
+                                    return 1
+                                }
+
                             }
-
                         }
                     }
                 }
