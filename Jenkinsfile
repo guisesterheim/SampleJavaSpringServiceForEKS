@@ -10,6 +10,9 @@ metadata:
 spec:
   serviceAccountName: jenkins-sa-agent
   containers:
+  - name: default
+    image: 'public.ecr.aws/z9u4r7b2/jenkins-agent:latest'
+    args: ['\$(JENKINS_SECRET)', '\$(JENKINS_NAME)']
   - name: kaniko
     image: 594483618195.dkr.ecr.us-east-1.amazonaws.com/kaniko:latest
     imagePullPolicy: Always
@@ -44,6 +47,17 @@ spec:
                 TAG         = 'latest'
             }
             steps {
+                echo 'teste'
+                sh '''
+                    echo $(docker --version)
+
+                    aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 594483618195.dkr.ecr.us-east-1.amazonaws.com
+                    docker build -t samplemsforeks .
+                    docker tag samplemsforeks:latest 594483618195.dkr.ecr.us-east-1.amazonaws.com/samplemsforeks:latest
+
+                    docker push 594483618195.dkr.ecr.us-east-1.amazonaws.com/samplemsforeks:latest
+                '''
+
                 sh '''#!/busybox/sh
                     /kaniko/executor \
                     --context=${GITREPO} \
