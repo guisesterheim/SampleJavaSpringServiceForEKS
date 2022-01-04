@@ -1,31 +1,28 @@
 pipeline {
     agent any
-//         kubernetes {
-//             label 'kaniko'
-//             yaml """
-// apiVersion: v1
-// kind: Pod
-// metadata:
-//   name: kaniko
-// spec:
-//   serviceAccountName: jenkins-sa-agent
-//   containers:
-//   - name: jnlp
-//     image: '594483618195.dkr.ecr.us-east-1.amazonaws.com/jenkins:latest'
-//     args: ['\$(JENKINS_SECRET)', '\$(JENKINS_NAME)']
-//   - name: kaniko
-//     image: 594483618195.dkr.ecr.us-east-1.amazonaws.com/kaniko:latest
-//     imagePullPolicy: Always
-//     command:
-//     - /busybox/cat
-//     tty: true
-//     resources:
-//       requests:
-//         cpu: "1"
-//         memory: 4Gi
-//   restartPolicy: Never
-// """
-//         }    
+        kubernetes {
+            label 'kaniko'
+            yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kaniko
+spec:
+  serviceAccountName: jenkins-sa-agent
+  containers:
+  - name: kaniko
+    image: 594483618195.dkr.ecr.us-east-1.amazonaws.com/kaniko:latest
+    imagePullPolicy: Always
+    command:
+    - /busybox/cat
+    tty: true
+    resources:
+      requests:
+        cpu: "1"
+        memory: 4Gi
+  restartPolicy: Never
+"""
+        }    
 
     options {
         disableConcurrentBuilds()
@@ -47,17 +44,6 @@ pipeline {
                 TAG         = 'latest'
             }
             steps {
-                echo 'teste'
-                sh '''
-                    echo $(docker --version)
-
-                    aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 594483618195.dkr.ecr.us-east-1.amazonaws.com
-                    docker build -t samplemsforeks .
-                    docker tag samplemsforeks:latest 594483618195.dkr.ecr.us-east-1.amazonaws.com/samplemsforeks:latest
-
-                    docker push 594483618195.dkr.ecr.us-east-1.amazonaws.com/samplemsforeks:latest
-                '''
-
                 sh '''#!/busybox/sh
                     /kaniko/executor \
                     --context=${GITREPO} \
