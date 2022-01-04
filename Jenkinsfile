@@ -20,30 +20,29 @@ pipeline {
                 '''
             }
         }
-        stage('Prepare, Test, Build & Sec'){
+        stage('Test, Build, Push & Sec'){
             parallel {
                 stage('Build, Test & Push'){
                     steps {
                         script {
                             env.CB_BUILD_ID = sh(script: 'aws codebuild start-build --project-name docker-build | jq -r .build.id', returnStdout: true).trim()
                             echo env.CB_BUILD_ID
+                        }
 
-                            def retryAttempt = 0
+                        timeout(time: 3, unit: 'MINUTES') {
                             retry(100) {
-                                sleep 5
+                                sh '''
+                                    sleep 5
 
-                                env.CB_BUILD_STATUS = sh(script: 'aws codebuild batch-get-builds --ids $CB_BUILD_ID | jq -r .builds[0].buildStatus', returnStdout: true).trim()
-                                echo env.CB_BUILD_STATUS
-                                if(env.CB_BUILD_STATUS == "SUCCEEDED"){
-                                    env.JOB_STATUS="SUCCESS"
-                                    return 0
-                                }else if(env.CB_BUILD_STATUS == "FAILED"){
-                                    env.JOB_STATUS="FAILURE"
-                                    return 0
-                                }else{
-                                    return 1
-                                }
-
+                                    status=$(aws codebuild batch-get-builds --ids $CB_BUILD_ID | jq -r .builds[0].buildStatus)
+                                    if [[ "$status" == "SUCCEEDED" ]]; then
+                                        exit 0
+                                    elif [[ "$status" == "FAILED" ]]; then
+                                        exit 0
+                                    else
+                                        exit 1
+                                    fi
+                                '''
                             }
                         }
                     }
