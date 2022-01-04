@@ -1,32 +1,5 @@
 pipeline {
-    agent {
-        kubernetes {
-            label 'kaniko'
-            yaml """
-apiVersion: v1
-kind: Pod
-metadata:
-  name: kaniko
-spec:
-  serviceAccountName: jenkins-sa-agent
-  containers:
-  - name: jnlp
-    image: 'public.ecr.aws/z9u4r7b2/jenkins-agent:latest'
-    args: ['\$(JENKINS_SECRET)', '\$(JENKINS_NAME)']
-  - name: kaniko
-    image: 594483618195.dkr.ecr.us-east-1.amazonaws.com/kaniko:latest
-    imagePullPolicy: Always
-    command:
-    - /busybox/cat
-    tty: true
-    resources:
-      requests:
-        cpu: "1"
-        memory: 4Gi
-  restartPolicy: Never
-"""
-        }    
-    }
+    agent any
 
     options {
         disableConcurrentBuilds()
@@ -38,45 +11,38 @@ spec:
     }
 
     stages {
-        stage('Testing'){
-            environment {
-                DOCKERFILE  = "Dockerfile.v3"
-                GITREPO     = "git://github.com/ollypom/mysfits.git"
-                CONTEXT     = "./api"
-                REGISTRY    = '594483618195.dkr.ecr.us-east-1.amazonaws.com'
-                IMAGE       = 'mysfits'
-                TAG         = 'latest'
-            }
+        stage('Prepare'){
             steps {
-                container(name: 'kaniko', shell: '/busybox/sh') {
-                    sh '''#!/busybox/sh
-                    /kaniko/executor \
-                    --context=${GITREPO} \
-                    --context-sub-path=${CONTEXT} \
-                    --dockerfile=${DOCKERFILE} \
-                    --destination=${REGISTRY}/${IMAGE}:${TAG}
-                    '''
-                }
+                sh '''
+                    aws configure set default.aws_access_key_id $AWS_CREDS_USR
+                    aws configure set default.aws_secret_access_key $AWS_CREDS_PSW
+                    aws configure set default.region $REGION
+                '''
             }
         }
         stage('Prepare, Test, Build & Sec'){
             parallel {
-                stage('Prepare'){
+                stage('Build, Test & Push'){
                     steps {
-                        sh '''
-                            aws configure set default.aws_access_key_id $AWS_CREDS_USR
-                            aws configure set default.aws_secret_access_key $AWS_CREDS_PSW
-                            aws configure set default.region $REGION
-                        '''
-                    }
-                }
-                stage('Build & Test'){
-                    steps {
-                        withGradle {
-                            sh '''
-                                export SPRING_PROFILES_ACTIVE=dev
-                                ./gradlew build --stacktrace
-                            '''
+                        env.CB_BUILD_ID = sh(script: 'aws codebuild start-build --project-name docker-build | jq -r .build.id', returnStdout: true).trim()
+                        echo env.CB_BUILD_ID
+
+                        def retryAttempt = 0
+                        retry(100) {
+                            sleep 5
+
+                            env.CB_BUILD_STATUS = sh(script: 'aws codebuild batch-get-builds --ids $CB_BUILD_ID | jq -r .builds[0].buildStatus', returnStdout: true).trim()
+                            echo env.CB_BUILD_STATUS
+                            if(env.CB_BUILD_STATUS == "SUCCEEDED"){
+                                env.JOB_STATUS="SUCCESS"
+                                return 0
+                            }else if(env.CB_BUILD_STATUS == "FAILED"){
+                                env.JOB_STATUS="FAILURE"
+                                return 0
+                            }else{
+                                return 1
+                            }
+
                         }
                     }
                 }
@@ -85,17 +51,6 @@ spec:
                         echo 'Waiting for Sonar...'
                     }
                 }
-            }
-        }
-        stage('Push Docker'){
-            steps {
-                sh '''
-                    aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 594483618195.dkr.ecr.us-east-1.amazonaws.com
-                    docker build -t samplemsforeks .
-                    docker tag samplemsforeks:latest 594483618195.dkr.ecr.us-east-1.amazonaws.com/samplemsforeks:latest
-
-                    docker push 594483618195.dkr.ecr.us-east-1.amazonaws.com/samplemsforeks:latest
-                '''
             }
         }
         stage('Deploy'){
