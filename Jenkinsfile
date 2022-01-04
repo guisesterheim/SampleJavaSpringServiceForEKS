@@ -48,14 +48,6 @@ spec:
                 TAG         = 'latest'
             }
             steps {
-                sh '''#!/busybox/sh
-                    /kaniko/executor \
-                    --context=${GITREPO} \
-                    --context-sub-path=${CONTEXT} \
-                    --dockerfile=${DOCKERFILE} \
-                    --destination=${REGISTRY}/${IMAGE}:${TAG}
-                '''
-
                 container(name: 'kaniko', shell: '/busybox/sh') {
                     sh '''#!/busybox/sh
                     /kaniko/executor \
