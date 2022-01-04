@@ -32,8 +32,9 @@ pipeline {
                         timeout(time: 3, unit: 'MINUTES') {
                             retry(100) {
                                 sh '''
-                                    sleep 5
+                                    #!/bin/bash
 
+                                    sleep 5
                                     status=$(aws codebuild batch-get-builds --ids $CB_BUILD_ID | jq -r .builds[0].buildStatus)
                                     if [[ "$status" == "SUCCEEDED" ]]; then
                                         exit 0
