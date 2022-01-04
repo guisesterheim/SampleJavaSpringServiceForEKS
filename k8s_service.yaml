@@ -4,13 +4,11 @@ metadata:
   name: server-demo
   labels:
     app: server-demo
-    role: ${TARGET_ROLE}
     env: dev
 spec:
   type: LoadBalancer
   selector:
     app: server-demo
-    role: ${TARGET_ROLE}
   ports:
     - port: 80
       targetPort: 8080
