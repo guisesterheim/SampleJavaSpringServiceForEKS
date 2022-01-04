@@ -59,8 +59,14 @@ pipeline {
             steps{
                 sh '''
                     aws eks update-kubeconfig --region $REGION --name $EKS_NAME
-                    kubectl apply -f k8s_deploy.yaml
-                    kubectl apply -f k8s_service.yaml
+                    
+                    app=$(kubectl get deployments | grep -c sample)
+                    if [ $app = 0 ]; then
+                        kubectl apply -f k8s_deploy.yaml
+                        kubectl apply -f k8s_service.yaml
+                    else
+                        kubectl replace -f k8s_deploy.yaml
+                    fi
                 '''
             }
         }

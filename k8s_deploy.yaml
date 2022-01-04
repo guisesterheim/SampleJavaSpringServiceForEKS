@@ -33,19 +33,3 @@ spec:
               cpu: 150m
               memory: 256M
       restartPolicy: Always
-        
----
-  
-apiVersion: v1
-kind: Service
-metadata:
-  name: sample-service
-  namespace: default
-spec:
-  selector:
-    app: sample
-  ports:
-    - port: 80
-      targetPort: 8080
-      protocol: TCP
-  type: LoadBalancer
