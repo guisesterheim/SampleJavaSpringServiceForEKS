@@ -65,7 +65,7 @@ pipeline {
                         kubectl apply -f k8s_deploy.yaml
                         kubectl apply -f k8s_service.yaml
                     else
-                        kubectl replace -f k8s_deploy.yaml
+                        kubectl rollout restart deployment sample
                     fi
                 '''
             }
