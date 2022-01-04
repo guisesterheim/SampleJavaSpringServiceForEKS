@@ -1,4 +1,4 @@
-FROM adoptopenjdk/openjdk11
+FROM public.ecr.aws/z9u4r7b2/java-base
 
 VOLUME /tmp
 
