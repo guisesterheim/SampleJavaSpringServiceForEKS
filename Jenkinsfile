@@ -36,9 +36,9 @@ pipeline {
 
                                     sleep 5
                                     status=$(aws codebuild batch-get-builds --ids $CB_BUILD_ID | jq -r .builds[0].buildStatus)
-                                    if [[ "$status" == "SUCCEEDED" ]]; then
+                                    if [ "$status" = "SUCCEEDED" ]; then
                                         exit 0
-                                    elif [[ "$status" == "FAILED" ]]; then
+                                    elif [ "$status" = "FAILED" ]; then
                                         exit 0
                                     else
                                         exit 1
