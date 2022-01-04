@@ -10,7 +10,7 @@ metadata:
 spec:
   serviceAccountName: jenkins-sa-agent
   containers:
-  - name: default
+  - name: jnlp
     image: 'public.ecr.aws/z9u4r7b2/jenkins-agent:latest'
     args: ['\$(JENKINS_SECRET)', '\$(JENKINS_NAME)']
   - name: kaniko
