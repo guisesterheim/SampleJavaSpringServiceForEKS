@@ -78,33 +78,13 @@ public class SecretsController extends BaseController {
         logger.debug("Starting "+this.kubernetesURLRedirection+"/api/v"+this.appVersion+"/status/version getAppVersion");
         logger.debug("App version = "+this.appVersion);
 
-        return ok(readLocalSecrets());
-    }
-
-    public ArrayList<File> listFilesForFolder(final File folder) {
-        ArrayList<File> fileList = new ArrayList<>();
-
-        for (File fileEntry : folder.listFiles())
-            fileList.add(fileEntry);
-
-        return fileList;
-    }
-
-    private ArrayList<String> readLocalSecrets(){
-        ArrayList<File> secretFiles = listFilesForFolder(new File("/mnt/secrets-store/"));
-        ArrayList<String> fileContents = new ArrayList<>();
-
-        for(File file : secretFiles){
-            try {
-                List<String> lines = Files.readAllLines(file.toPath(), Charsets.UTF_8);
-
-                for(String line : lines)
-                    fileContents.add(line);
-            }catch(Exception e){
-                System.out.println("Error reading files");
-            }
+        try {
+            List<String> lines = Files.readAllLines(new File("/mnt/secrets-store/arn:aws:secretsmanager:us-east-1:594483618195:secret:fs_simple_secret-tgSUnW").toPath(), Charsets.UTF_8);
+            return ok(lines);
+        }catch(Exception e){
+            System.out.println("Error reading files");
         }
 
-        return fileContents;
+        return ok("No credentials found")
     }
 }
