@@ -60,8 +60,8 @@ pipeline {
                 sh '''
                     aws eks update-kubeconfig --region $REGION --name $EKS_NAME
 
-                    app=$(kubectl get deployments 2>&1)
-                    if [ "$app" == *"No resources found"* ]; then
+                    app=$(kubectl get deployments)
+                    if [ -z "$app" ]; then
                         kubectl apply -f k8s_deploy.yaml
                         kubectl apply -f k8s_service.yaml
                     else
