@@ -85,6 +85,6 @@ public class SecretsController extends BaseController {
             System.out.println("Error reading files");
         }
 
-        return ok("No credentials found")
+        return ok("No credentials found");
     }
 }
