@@ -19,7 +19,7 @@ spec:
       labels:
         app: sample
     spec:
-      serviceAccountName: nginx-deployment-sa
+      serviceAccountName: aws-secrets-sa
       volumes:
       - name: secrets-store-inline
         csi:
@@ -31,6 +31,17 @@ spec:
         - name: sample
           image: 594483618195.dkr.ecr.us-east-1.amazonaws.com/samplemsforeks:latest
           imagePullPolicy: Always
+          env:
+          - name: AWS_ACCESS_KEY_FROM_K8S
+            valueFrom:
+              secretKeyRef:
+                name: spring-secret
+                key: spring.user.name
+          - name: AWS_SECRET_KEY_FROM_K8S
+            valueFrom:
+              secretKeyRef:
+                name: spring-secret
+                key: spring.user.password
           ports:
           - containerPort: 8080
           resources:

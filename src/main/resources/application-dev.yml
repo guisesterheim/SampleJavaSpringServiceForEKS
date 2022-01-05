@@ -13,3 +13,5 @@ app:
   version: "1"
   kubernetes:
     URLRedirect: "/api/sampleJavaSpringService"
+  aws_access_key: ${AWS_ACCESS_KEY_FROM_K8S}
+  aws_secret_key: ${AWS_SECRET_KEY_FROM_K8S}

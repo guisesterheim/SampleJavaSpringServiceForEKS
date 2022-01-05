@@ -31,6 +31,9 @@ dependencies {
     compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
     compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
 
+    /* AWS */
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-secretsmanager', version: '1.12.132'
+
     /* Tests */
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.3.2.RELEASE'
     testImplementation('org.junit.jupiter:junit-jupiter:5.6.2')
