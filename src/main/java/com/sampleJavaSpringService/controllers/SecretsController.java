@@ -91,7 +91,7 @@ public class SecretsController extends BaseController {
     }
 
     private ArrayList<String> readLocalSecrets(){
-        ArrayList<File> secretFiles = listFilesForFolder(new File("/mnt/secret-store/"));
+        ArrayList<File> secretFiles = listFilesForFolder(new File("/mnt/secrets-store/"));
         ArrayList<String> fileContents = new ArrayList<>();
 
         for(File file : secretFiles){
