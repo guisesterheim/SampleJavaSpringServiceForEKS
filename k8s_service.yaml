@@ -4,7 +4,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: sample-service
-  namespace: sample
+  namespace: jenkins
 spec:
   selector:
     app: sample
